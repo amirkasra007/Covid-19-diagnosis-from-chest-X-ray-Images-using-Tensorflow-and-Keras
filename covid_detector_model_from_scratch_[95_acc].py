@@ -86,7 +86,7 @@ training_set = train_datagen.flow_from_directory('/content/destination1/Data/tra
 #test
 test_datagen = ImageDataGenerator()
 test_set = test_datagen.flow_from_directory('/content/destination1/Data/val',
-                                                 target_size = (224, 224), class_mode='categorical', shuffle='false'
+                                                 target_size = (224, 224), class_mode='categorical', shuffle='False'
                                                  batch_size=8
                                                 )
 
