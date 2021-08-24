@@ -12,10 +12,11 @@ files.upload()
 
 !pip install -q kaggle
 
+
 !mkdir ~/.kaggle
 !touch ~/.kaggle/kaggle.json
 
-api_token = {"username":"amirkasraamini","key":"e9d3dc0c7d67fe619449aba85338297b"}
+api_token = {"username":" your kaggle username","key":"*****"}
 
 import json
 
@@ -24,13 +25,15 @@ with open('/root/.kaggle/kaggle.json', 'w') as file:
 
 !chmod 600 ~/.kaggle/kaggle.json
 
+
+
 !kaggle datasets download -d prashant268/chest-xray-covid19-pneumonia #3-class dataset
-
 mkdir destination1
-
 !unzip /content/chest-xray-covid19-pneumonia.zip -d destination1
 
-!unzip /content/nih224folderwise-data.zip -d destination2
+
+
+###Crating validation folder and moving some images from the original train folder to it
 
 import os
 import numpy as np
@@ -70,12 +73,18 @@ for cls in classes_dir:
   for name in val_FileNames:
     shutil.move(name, make_dir +'/val/' + cls)
 
+    
+###Importing the libraries and modules    
+    
 import tensorflow as tf
 import keras,os
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, MaxPool2D , Flatten
 from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
+
+
+
 
 #train
 train_datagen = ImageDataGenerator()
@@ -95,6 +104,10 @@ val_datagen = ImageDataGenerator()
 val_set = val_datagen.flow_from_directory('/content/destination1/Data/test',
                                             target_size = (224, 224), class_mode='categorical', batch_size=32
                                            )
+
+
+
+###Building the model from scratch
 
 model = Sequential()
 
@@ -125,17 +138,25 @@ model.add(Conv2D(filters=512, kernel_size=(3,3), padding="same", activation="rel
 
 model.add(MaxPool2D(pool_size=(2,2),strides=(2,2)))
 
+
+###Building the Neuran network(Dense layers)
+
 model.add(Flatten())
 model.add(Dense(units=512,activation="relu"))
 model.add(Dense(units=1024,activation="relu"))
 model.add(Dense(units=3, activation="softmax"))
 
-from keras.optimizers import Adam
+
+##Optimizer
+from tf.keras.optimizers import Adam
 opt = Adam(learning_rate=0.001)
+
 
 model.compile(optimizer=opt, loss=keras.losses.categorical_crossentropy, metrics=['accuracy'])
 
 model.summary()
+
+
 
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 
@@ -144,6 +165,8 @@ checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_b
 # early = EarlyStopping(monitor='val_accuracy', min_delta=0, patience=20, mode='auto')
 
 results = model.fit(x=training_set, validation_data= val_set, epochs=25,callbacks=checkpoint)
+
+
 
 """# Model accuracy and loss graphs"""
 
@@ -157,6 +180,10 @@ plt.ylabel("Accuracy")
 plt.xlabel("Epoch")
 plt.legend(["Accuracy","Validation Accuracy","loss","Validation Loss"])
 plt.show()
+
+
+
+
 
 """# Graphical confusion matrix
 
@@ -247,6 +274,9 @@ cm = confusion_matrix(test_set.classes, y_pred)
 
 plot_confusion_matrix(cm, target_names, title='Confusion Matrix')
 
+
+
+
 """# Classification report"""
 
 test_steps_per_epoch = np.math.ceil(test_set.samples / test_set.batch_size)
@@ -259,6 +289,8 @@ class_labels = list(test_set.class_indices.keys())
 
 report = classification_report(true_classes, predicted_classes, target_names=class_labels)
 print(report)
+
+
 
 """# Saving and Loading the model for prediction"""
 
@@ -298,6 +330,9 @@ loaded_model.load_weights('best_Model_weights.h5')
 
 # loaded_model.save('best_Model_weights.hdf5')
 # loaded_model=load_model('best_Model_weights.hdf5')
+
+
+
 
 """# Deploying the model to Predict a single sample."""
 
