@@ -96,7 +96,7 @@ training_set = train_datagen.flow_from_directory('/content/destination1/Data/tra
 test_datagen = ImageDataGenerator()
 test_set = test_datagen.flow_from_directory('/content/destination1/Data/val',
                                                  target_size = (224, 224), class_mode='categorical',
-                                                 batch_size=8, shuffle= False
+                                                 batch_size=16, shuffle= False
                                                 )
 
 #validation
@@ -297,15 +297,29 @@ print(report)
 from keras.models import model_from_json
 from keras.models import load_model
 
+
+# serialize model to JSON
 model_json = model.to_json()
 with open("/content/best_Model_weights.json", "w") as json_file:
     json_file.write(model_json)
 
+    
+# load json and create model    
 json_file = open('/content/best_Model_weights.json', 'r')
 loaded_model_json = json_file.read()
 json_file.close()
 loaded_model = model_from_json(loaded_model_json)
+
+# load weights into new model
 loaded_model.load_weights('best_Model_weights.h5')
+
+
+# evaluate loaded model on test data
+loaded_model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+score = loaded_model.evaluate(test_set, verbose=0)
+print ("%s: %.2f%%" % (loaded_model.metrics_names[1], score[1]*100))
+
+
 
 # from keras.models import model_from_json
 # from keras.models import load_model
@@ -355,12 +369,13 @@ test_set.class_indices
 if result[0][0][0] == 1:
   prediction = 'Normal'
 elif result[0][1][0] ==1:
-  prediction = 'PNEUMONIA'
+  prediction = 'COVID'
 else:
-  prediction = 'Covid'
+  prediction = 'PNEUMONIA'
 
 print(prediction)
 print(result)
+
 
 """# the code for the 4-class dataset and its organization."""
 
