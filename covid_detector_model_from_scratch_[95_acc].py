@@ -357,24 +357,29 @@ print ("%s: %.2f%%" % (loaded_model.metrics_names[1], score[1]*100))
 # img = np.expand_dims(img, axis=0)
 # loaded_model.predict(img)
 
-import numpy as np
-from keras.preprocessing import image
-test_image = image.load_img('......', target_size = (224, 224))
-test_image = image.img_to_array(test_image)
-test_image = np.expand_dims(test_image, axis = 1)
-predicted_classes= np.argmax(loaded_model.predict(test_image), axis=1)
+from tensorflow.keras.applications.resnet50 import preprocess_input, decode_predictions
+from tensorflow.keras.preprocessing import image
 
-result = loaded_model.predict(test_image)
-test_set.class_indices
-if result[0][0][0] == 1:
-  prediction = 'Normal'
-elif result[0][1][0] ==1:
-  prediction = 'COVID'
-else:
-  prediction = 'PNEUMONIA'
+# Helper libraries
 
-print(prediction)
-print(result)
+def classify(img_path):
+    img = image.load_img(img_path, target_size=(224, 224))
+    img_array = image.img_to_array(img)
+
+    img_batch = np.expand_dims(img_array, axis=0)
+
+    img_preprocessed = preprocess_input(img_batch)
+
+    prediction = model.predict(img_batch)
+
+    # print(decode_predictions(prediction, top=1)[0])
+    return prediction
+
+
+classify("/content/COVID19(111).jpg")
+# classify("/content/NORMAL(1272).jpg")
+
+
 
 
 """# the code for the 4-class dataset and its organization."""
