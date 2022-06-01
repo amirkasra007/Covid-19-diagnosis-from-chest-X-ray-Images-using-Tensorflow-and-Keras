@@ -272,10 +272,10 @@ test_image = np.expand_dims(test_image, axis = 0)
 result = model.predict(test_image)
 training_set.class_indices
 if result[0][0] == 1:
-  prediction = 'NORMAL'
-elif result[0][0] ==0:
   prediction = 'COVID19'
-else:
+elif result[0][1] ==1:
+  prediction = 'NORMAL'
+elif result[0][2] ==1:
   prediction = 'PNEUMONIA'
 
 print(result)
